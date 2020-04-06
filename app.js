@@ -12,23 +12,7 @@ const ItemCtrl = (function () {
 
     // Data Structure / State
     const data = {
-        items: [{
-                id: 0,
-                name: 'Steak Dinner',
-                calories: 1200
-            },
-            {
-                id: 1,
-                name: 'Cookie',
-                calories: 250
-            },
-            {
-                id: 2,
-                name: 'Eggs',
-                calories: 300
-            },
-
-        ],
+        items: [],
         currentItem: null,
         totalCalories: 0
     }
@@ -89,6 +73,24 @@ const UICtrl = (function () {
                 calories: document.querySelector(UISelectors.itemCaloriesInput).value
             }
         },
+        addListItem: function (item) {
+            const li = document.createElement('li')
+            li.className = 'collection-item'
+            li.id = `item-${item.id}`
+            li.innerHTML = `
+            <strong>${item.name}: </strong><em>${item.calories} Calories</em>
+            <a href="#" class="secondary-content"><i class="edit-item fas fa-pencil-alt blue-text"></i></a>
+            `
+            document.querySelector(UISelectors.itemList).style.display = 'block'
+            document.querySelector(UISelectors.itemList).insertAdjacentElement('beforeend', li)
+        },
+        clearInput: function () {
+            document.querySelector(UISelectors.itemNameInput).value = ''
+            document.querySelector(UISelectors.itemCaloriesInput).value = ''
+        },
+        hideList: function () {
+            document.querySelector(UISelectors.itemList).style.display = 'none'
+        },
         getSelectors: function () {
             return UISelectors
         }
@@ -99,8 +101,8 @@ const UICtrl = (function () {
 const App = (function (ItemCtrl, UICtrl) {
     // Load event listeners
     const loadEventListeners = function () {
-        const UISelectiors = UICtrl.getSelectors()
-        document.querySelector(UISelectiors.addBtn).addEventListener('click', itemAddSubmit)
+        const UISelectors = UICtrl.getSelectors()
+        document.querySelector(UISelectors.addBtn).addEventListener('click', itemAddSubmit)
     }
 
     const itemAddSubmit = function (e) {
@@ -108,6 +110,9 @@ const App = (function (ItemCtrl, UICtrl) {
 
         if (input.name !== '' && input.calories !== '') {
             const newItem = ItemCtrl.addItem(input.name, input.calories)
+            UICtrl.addListItem(newItem)
+
+            UICtrl.clearInput()
         }
 
         e.preventDefault()
@@ -116,7 +121,11 @@ const App = (function (ItemCtrl, UICtrl) {
     return {
         init: function () {
             const items = ItemCtrl.getItems()
-            UICtrl.populateItemList(items)
+            if (items.length === 0) {
+                UICtrl.hideList()
+            } else {
+                UICtrl.populateItemList(items)
+            }
             loadEventListeners()
         }
     }
